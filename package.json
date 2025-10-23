@@ -1,22 +1,45 @@
 {
   "name": "cypress",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cypress E2E Testing with Session Management",
   "main": "test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cypress run",
+    "test:headed": "cypress run --headed",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:edge": "cypress run --browser edge",
+    "test:login": "cypress run --spec 'cypress/e2e/auth/login.js'",
+    "test:dashboard": "cypress run --spec 'cypress/e2e/dashboard/dashboard.js'",
+    "test:settings": "cypress run --spec 'cypress/e2e/settings.js'",
+    "test:transactions": "cypress run --spec 'cypress/e2e/transactions.js'",
+    "open": "cypress open",
+    "clear:sessions": "rm -rf node_modules/.cache/Cypress",
+    "report": "cypress run --reporter cypress-mochawesome-reporter",
+    "report:merge": "mochawesome-merge cypress/results/*.json > cypress/results/merged-report.json",
+    "report:generate": "marge cypress/results/merged-report.json -f report -o cypress/reports"
   },
-  "keywords": [],
+  "keywords": [
+    "cypress",
+    "e2e",
+    "testing",
+    "automation"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "cypress": "^15.5.0",
-    "mocha": "^10.4.0",
-    "cypress-mochawesome-reporter": "^3.7.0",
-    "faker": "^5.5.3"
+    "dotenv": "^17.2.1",
+    "otplib": "^12.0.1"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.3.1"
+    "@faker-js/faker": "^8.3.1",
+    "@cypress/grep": "^4.1.1",
+    "cypress-mochawesome-reporter": "^4.0.2",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0",
+    "prettier": "^3.6.2"
   }
 }
