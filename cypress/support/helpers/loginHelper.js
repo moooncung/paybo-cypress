@@ -41,23 +41,15 @@ class LoginHelper {
 
 
     submitForm() {
-        const submitSelectors = [
-            '[data-cy="login-button"]',
-            'button[type="submit"]',
-            'input[type="submit"]',
-            'button:contains("Login")',
-            'button:contains("Sign In")'
-        ];
-
         cy.get('body').then(($body) => {
             let submitted = false;
-            submitSelectors.forEach(selector => {
-                if (!submitted && $body.find(selector).length > 0) {
-                    cy.get(selector).click();
+            cy.get('.btn').contains('Login').then($btn => {
+                if ($btn.length > 0) {
+                    cy.wrap($btn).click();
                     submitted = true;
                 }
             });
-
+            
             if (!submitted) {
                 cy.get('input[type="password"]').type('{enter}');
             }
