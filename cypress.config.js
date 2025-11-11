@@ -1,8 +1,11 @@
-const { defineConfig } = require("cypress");
+const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
-  projectId: 'hkr6k7',
+    projectId: 'hkr6k7',
   e2e: {
+    baseUrl: 'https://bo-dev-p1.paybo.io',
+    viewportWidth: 1280,
+    viewportHeight: 720,
     defaultCommandTimeout: 15000,
     requestTimeout: 15000,
     responseTimeout: 30000,
@@ -14,17 +17,64 @@ module.exports = defineConfig({
     watchForFileChanges: false,
     chromeWebSecurity: false,
     experimentalStudio: true,
-
+    
     setupNodeEvents(on, config) {
+      // Task untuk logging
+      on('task', {
+        log(message) {
+          console.log(`[${new Date().toISOString()}] ${message}`);
+          return null;
+        },
+        
+        // Task untuk database operations (jika diperlukan)
+        queryDB(query) {
+          // Implement database query if needed
+          console.log('Database query:', query);
+          return null;
+        },
+
+        // Task untuk file operations
+        readFileMaybe(filename) {
+          try {
+            return require('fs').readFileSync(filename, 'utf8');
+          } catch (e) {
+            return null;
+          }
+        }
+      });
+
       require('cypress-mochawesome-reporter/plugin')(on);
+      require('@cypress/grep/src/plugin')(config);
+      
+      return config;
+    },
+
+    // Laporan Mochawesome konfigurasi
+    reporter: 'cypress-mochawesome-reporter',
+    reporterOptions: {
+      reportDir: 'cypress/reports',
+      overwrite: false,
+      html: false,
+      json: true,
     },
 
     env: {
+      // Base configuration
       username: 'demo_psp3@mail.com',
       password: 'E8rP4qA3',
-      apiUrl: 'https://bo-dev-p1.paybo.io'
+      baseUrl: 'https://bo-dev-p1.paybo.io',
+      
+      // Test configuration
+      defaultTimeout: 10000,
+      retryCount: 2,
+      screenshotOnFail: true,
     },
-    
-    specPattern: "cypress/e2e/**/*.js",
+
+    specPattern: 'cypress/e2e/**/*.js',
+
+    excludeSpecPattern: [
+      '**/*.skip.cy.js',
+      '**/*.wip.cy.js'
+    ]
   },
 });
