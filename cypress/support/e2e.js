@@ -60,7 +60,7 @@ beforeEach(() => {
 afterEach(function() {
     // Take screenshot on failure
     if (this.currentTest.state === 'failed' && Cypress.env('screenshotOnFail')) {
-        const testName = this.currentTest.title.replace(/[^a-zA-Z0-9]/g, '-');
-        cy.takeScreenshot(`failed-${testName}`);
+        const testName = this.currentTest.title.replace(/[^a-zA-Z0-9]/g, '-');  
+        cy.takeScreenshot(`FAILED-${testName}`, { capture: 'fullPage' });
     }
 });

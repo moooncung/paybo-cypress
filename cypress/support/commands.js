@@ -64,8 +64,14 @@ Cypress.Commands.add('verifyLoginError', (msg = null) => {
 
 // ===================== API, CHECK & LOGGING =====================
 Cypress.Commands.add('takeScreenshot', (name) => {
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
-    cy.screenshot(`${name}-${ts}`);
+    const getLocalTimestamp = () => {
+    const d = new Date(Date.now() + 7 * 60 * 60 * 1000); // GMT+7
+    return d.toISOString()
+        .replace('T', ' ')
+        .replace(/\..+/, '')
+        .replace(/:/g, '-');
+    };
+    cy.screenshot(`${getLocalTimestamp()}-${name}`, { capture: 'fullPage' });
 });
 
 Cypress.Commands.add('logAction', (msg, data = null) => {
