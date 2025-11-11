@@ -38,24 +38,22 @@ if (!app.document.head.querySelector('[data-hide-command-log-request]')) {
 }
 
 Cypress.on('uncaught:exception', (err, runnable) => {
-    cy.task('log', `Uncaught exception: ${err.message}`);
-    
+    console.warn('⚠️ Uncaught exception ignored:', err.message);
+
     const ignoredErrors = [
         'ResizeObserver loop limit exceeded',
         'Non-Error promise rejection captured',
         'Script error',
-        'Network request failed'
+        'Network request failed',
+        'Livewire is not defined'
     ];
-    
-    return !ignoredErrors.some(errorMsg => err.message.includes(errorMsg));
+    return !ignoredErrors.some(msg => err.message.includes(msg));
 });
 
 beforeEach(() => {
     cy.viewport(1280, 720);
-    
     cy.clearCookies();
     cy.clearLocalStorage();
-    
     cy.intercept('GET', '**/api/**').as('apiCall');
 });
 

@@ -43,10 +43,7 @@ module.exports = defineConfig({
         }
       });
 
-      // Plugin untuk mochawesome reporter
       require('cypress-mochawesome-reporter/plugin')(on);
-
-      // Plugin untuk grep functionality
       require('@cypress/grep/src/plugin')(config);
       
       return config;
@@ -55,10 +52,10 @@ module.exports = defineConfig({
     // Laporan Mochawesome konfigurasi
     reporter: 'cypress-mochawesome-reporter',
     reporterOptions: {
-      reportDir: 'cypress/reports', // direktori tempat laporan disimpan
-      overwrite: false, // jangan menimpa laporan yang ada
-      html: false, // matikan HTML report jika hanya ingin JSON
-      json: true, // pastikan menghasilkan laporan dalam format JSON
+      reportDir: 'cypress/reports',
+      overwrite: false,
+      html: false,
+      json: true,
     },
 
     env: {
@@ -71,50 +68,6 @@ module.exports = defineConfig({
       defaultTimeout: 10000,
       retryCount: 2,
       screenshotOnFail: true,
-      
-      // Environment specific
-      environment: 'uat',
-      apiUrl: 'https://bo-dev-p1.paybo.io/api',
-      
-      // Feature flags
-      enableApiTests: true,
-      enableAccessibilityTests: true,
-      enablePerformanceTests: true,
-      
-      // Test data
-      testUsers: {
-        merchant: {
-          email: 'merchant@seapay88.com',
-          password: 'fKj&l56v',
-          role: 'merchant'
-        },
-        admin: {
-          email: 'admin@seapay88.com',
-          password: 'admin123',
-          role: 'admin'
-        }
-      },
-      
-      // Selectors configuration
-      selectors: {
-        login: {
-          email: '[name="email"], input[type="email"], #email',
-          password: '[name="password"], input[type="password"], #password',
-          submit: 'button[type="submit"], .login-btn, [data-cy="login-button"]'
-        },
-        navigation: {
-          dashboard: '[data-cy="menu-dashboard"], a[href*="dashboard"]',
-          transactions: '[data-cy="menu-transactions"], a[href*="transaction"]',
-          reports: '[data-cy="menu-reports"], a[href*="report"]',
-          settings: '[data-cy="menu-settings"], a[href*="setting"]'
-        }
-      }
-    },
-
-    // Retry configuration
-    retries: {
-      runMode: 2,
-      openMode: 1
     },
 
     specPattern: 'cypress/e2e/**/*.js',
@@ -123,12 +76,5 @@ module.exports = defineConfig({
       '**/*.skip.cy.js',
       '**/*.wip.cy.js'
     ]
-  },
-
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'webpack',
-    },
   },
 });
