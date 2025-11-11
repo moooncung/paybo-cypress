@@ -4,8 +4,8 @@ module.exports = defineConfig({
     projectId: 'hkr6k7',
   e2e: {
     baseUrl: 'https://bo-dev-p1.paybo.io',
-    viewportWidth: 1280,
-    viewportHeight: 720,
+    viewportWidth: 1920,
+    viewportHeight: 1080,
     defaultCommandTimeout: 15000,
     requestTimeout: 15000,
     responseTimeout: 30000,
