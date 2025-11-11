@@ -1,44 +1,30 @@
 // LoginHelper.js
 class LoginHelper {
     fillCredentials(email, password) {
-        const emailSelectors = ['[name="email"]', '#username', '.username'];
-        const passwordSelectors = ['[name="password"]', 'input[type="password"]', '#password'];
-
         cy.get('body').then(($body) => {
-            // Email
-            let emailFilled = false;
-            emailSelectors.forEach(selector => {
-                if (!emailFilled && $body.find(selector).length > 0) {
-                    if (email !== null && email !== undefined) { // hanya type kalau ada value
-                        cy.get(selector).clear().type(email);
-                    } else {
-                        cy.get(selector).clear();
-                    }
-                    emailFilled = true;
+            if ($body.find('#username').length > 0) {
+                if (email !== null && email !== undefined) {
+                    cy.get('#username').type(email);
+                } else {
+                    cy.get('#username').clear();
                 }
-            });
+            } else {
+                throw new Error('Email field not found');
+            }
 
-            // Password
-            let passwordFilled = false;
-            passwordSelectors.forEach(selector => {
-                if (!passwordFilled && $body.find(selector).length > 0) {
-                    if (password !== null && password !== undefined) {
-                        cy.get(selector).clear().type(password);
-                    } else {
-                        cy.get(selector).clear();
-                    }
-                    passwordFilled = true;
+            if ($body.find('#password').length > 0) {
+                if (password !== null && password !== undefined) {
+                    cy.get('#password').type(password);
+                } else {
+                    cy.get('#password').clear();
                 }
-            });
-
-            if (!emailFilled || !passwordFilled) {
-                throw new Error('Could not find email or password fields');
+            } else {
+                throw new Error('Password field not found');
             }
         });
 
         return this;
     }
-
 
     submitForm() {
         cy.get('body').then(($body) => {
@@ -47,12 +33,10 @@ class LoginHelper {
                 if ($btn.length > 0) {
                     cy.wrap($btn).click();
                     submitted = true;
+                } else {
+                    cy.get('#password').type('{enter}');
                 }
             });
-            
-            if (!submitted) {
-                cy.get('input[type="password"]').type('{enter}');
-            }
         });
     }
 
