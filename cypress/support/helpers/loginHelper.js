@@ -80,4 +80,38 @@ class LoginHelper {
     }
 }
 
-export default LoginHelper;
+const loginHelper = new LoginHelper();
+
+export function loginCommands(Cypress) {
+
+    Cypress.Commands.add('loginHelper', (email = null, password = null) => {
+        const user = {
+            email: email || Cypress.env('username'),
+            password: password || Cypress.env('password'),
+        };
+
+        cy.session(`login-${user.email}`, () => {
+            cy.visit('/login'); // URL login
+            cy.then(() => {
+                loginHelper.fillCredentials(user.email, user.password);
+                loginHelper.submitForm();
+                loginHelper.verifySuccessfulLogin();
+            });
+        });
+
+        // Return helper supaya bisa chaining
+        return cy.wrap(loginHelper);
+    });
+
+    Cypress.Commands.add('submitLogin', () => {
+        return loginHelper.submitForm();
+    });
+
+    Cypress.Commands.add('verifyLoginSuccess', () => {
+        return loginHelper.verifySuccessfulLogin();
+    });
+
+    Cypress.Commands.add('verifyLoginError', (msg = null) => {
+        return loginHelper.verifyLoginError(msg);
+    });
+}
