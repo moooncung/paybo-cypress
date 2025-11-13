@@ -1,4 +1,5 @@
 const { defineConfig } = require('cypress');
+const installLogsPrinter = require('cypress-terminal-report/src/installLogsPrinter');
 const path = require('path');
 const dotenv = require('dotenv');
 
@@ -6,7 +7,8 @@ const envFile = '.env';
 dotenv.config({ path: path.resolve(__dirname, './', envFile) });
 
 module.exports = defineConfig({
-    projectId: 'hkr6k7',
+  projectId: 'hkr6k7',
+
   e2e: {
     baseUrl: 'https://bo-dev-p1.paybo.io',
     viewportWidth: 1920,
@@ -22,23 +24,21 @@ module.exports = defineConfig({
     watchForFileChanges: false,
     chromeWebSecurity: false,
     experimentalStudio: true,
-    
+
     setupNodeEvents(on, config) {
-      // Task untuk logging
+      installLogsPrinter(on);
+
       on('task', {
         log(message) {
           console.log(`[${new Date().toISOString()}] ${message}`);
           return null;
         },
-        
-        // Task untuk database operations (jika diperlukan)
+
         queryDB(query) {
-          // Implement database query if needed
           console.log('Database query:', query);
           return null;
         },
 
-        // Task untuk file operations
         readFileMaybe(filename) {
           try {
             return require('fs').readFileSync(filename, 'utf8');
@@ -50,34 +50,30 @@ module.exports = defineConfig({
 
       require('cypress-mochawesome-reporter/plugin')(on);
       require('@cypress/grep/src/plugin')(config);
-      
+
       return config;
     },
 
-    // Laporan Mochawesome konfigurasi
     reporter: 'cypress-mochawesome-reporter',
     reporterOptions: {
       reportDir: 'cypress/reports',
-      overwrite: false,
+      overwrite: true,
       html: false,
       json: true,
     },
 
     env: {
       baseUrl: process.env.BASE_URL,
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
-
-      // Test configuration
+      username: process.env.USERNAME_BO,
+      password: process.env.PASSWORD_BO,
       defaultTimeout: 10000,
       retryCount: 2,
       screenshotOnFail: true,
     },
 
     specPattern: 'cypress/e2e/**/*.js',
-
     excludeSpecPattern: [
-      '**/*.skip.cy.js',
+      '**/*.skip.cy.js', 
       '**/*.wip.cy.js'
     ]
   },
