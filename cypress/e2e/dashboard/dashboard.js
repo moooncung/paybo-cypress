@@ -1,7 +1,7 @@
 describe('BO - Dashboard', () => {
     beforeEach(() => {
         // Login dan restore session
-        cy.loginHelper(Cypress.env('username'), Cypress.env('password'));
+        cy.loginHelper();
         cy.logAction('✅ Session restored & user logged in');
     });
 

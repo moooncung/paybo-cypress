@@ -30,7 +30,7 @@
   "type": "commonjs",
   "devDependencies": {
     "cypress": "^14.5.4",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.3",
     "otplib": "^12.0.1"
   },
   "dependencies": {

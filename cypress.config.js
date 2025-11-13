@@ -1,4 +1,9 @@
 const { defineConfig } = require('cypress');
+const path = require('path');
+const dotenv = require('dotenv');
+
+const envFile = '.env';
+dotenv.config({ path: path.resolve(__dirname, './', envFile) });
 
 module.exports = defineConfig({
     projectId: 'hkr6k7',
@@ -59,11 +64,10 @@ module.exports = defineConfig({
     },
 
     env: {
-      // Base configuration
-      username: 'demo_psp3@mail.com',
-      password: 'E8rP4qA3',
-      baseUrl: 'https://bo-dev-p1.paybo.io',
-      
+      baseUrl: process.env.BASE_URL,
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+
       // Test configuration
       defaultTimeout: 10000,
       retryCount: 2,
