@@ -1,20 +1,21 @@
-// LoginHelper.js
 class LoginHelper {
-    fillCredentials(email, password) {
+    fillCredentials(username = Cypress.env('username'), password = Cypress.env('password')) {
         cy.get('body').then(($body) => {
             if ($body.find('#username').length > 0) {
-                if (email !== null && email !== undefined) {
-                    cy.get('#username').type(email);
+                if (username) {
+                    cy.logAction('Filling in username with ' + username);
+                    cy.get('#username').clear().type(username);
                 } else {
                     cy.get('#username').clear();
                 }
             } else {
-                throw new Error('Email field not found');
+                throw new Error('Username field not found');
             }
 
             if ($body.find('#password').length > 0) {
-                if (password !== null && password !== undefined) {
-                    cy.get('#password').type(password);
+                if (password) {
+                    cy.logAction('Filling in password with ' + password);
+                    cy.get('#password').clear().type(password);
                 } else {
                     cy.get('#password').clear();
                 }
@@ -28,15 +29,12 @@ class LoginHelper {
 
     submitForm() {
         cy.get('body').then(($body) => {
-            let submitted = false;
-            cy.get('.btn').contains('Login').then($btn => {
-                if ($btn.length > 0) {
-                    cy.wrap($btn).click();
-                    submitted = true;
-                } else {
-                    cy.get('#password').type('{enter}');
-                }
-            });
+            const loginButton = $body.find('.btn:contains("Login")');
+            if (loginButton.length > 0) {
+                cy.wrap(loginButton).click();
+            } else {
+                cy.get('#password').type('{enter}');
+            }
         });
     }
 
@@ -64,20 +62,20 @@ class LoginHelper {
 
     verifyLoginError(expectedMessage = null) {
         const errorSelectors = [
-            '[data-cy="error-message"]', '.error', '.alert-danger', '.invalid-feedback', '.form-error'
+            '[data-cy="error-message"]',
+            '.error',
+            '.alert-danger',
+            '.invalid-feedback',
+            '.form-error'
         ];
 
         cy.get('body').then(($body) => {
-            let found = false;
-            errorSelectors.forEach(selector => {
-                if (!found && $body.find(selector).length > 0) {
-                    const errorEl = cy.get(selector).should('be.visible');
-                    if (expectedMessage) {
-                        errorEl.should('contain.text', expectedMessage);
-                    }
-                    found = true;
-                }
-            });
+            const found = errorSelectors.some(selector => $body.find(selector).length > 0);
+            expect(found, 'Error message found').to.be.true;
+
+            if (expectedMessage) {
+                cy.get(errorSelectors.join(',')).should('contain.text', expectedMessage);
+            }
         });
     }
 }

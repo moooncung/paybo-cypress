@@ -7,11 +7,13 @@ describe('BO - Login Tests', () => {
   });
 
   it('Should login with valid credentials', () => {
-    cy.loginHelper(Cypress.env('username'), Cypress.env('password'));
+    cy.logAction('Logging in with valid credentials');
+    cy.loginHelper();
     cy.takeScreenshot('successful-login');
   });
 
   it('Should show validation errors for empty fields', () => {
+    cy.logAction('Testing empty fields validation');
     cy.then(() => {
       const helper = new LoginHelper();
       helper.fillCredentials(null, null);
@@ -22,6 +24,7 @@ describe('BO - Login Tests', () => {
   });
 
   it('Should show error for invalid credentials', () => {
+    cy.logAction('Testing invalid credentials');
     cy.then(() => {
       const helper = new LoginHelper();
       helper.fillCredentials('invalid@email.com', 'wrongpassword');

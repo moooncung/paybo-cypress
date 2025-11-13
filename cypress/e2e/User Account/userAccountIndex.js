@@ -25,12 +25,12 @@ describe('BO - User Account', () => {
 
     beforeEach(() => {
         // Login dan restore session
-        cy.loginHelper(Cypress.env('username'), Cypress.env('password'));
+        cy.loginHelper();
         cy.logAction('✅ Session restored & user logged in');
     });
 
     it('Should can see the dashboard', () => {
-        cy.logAction('➡️ User Account Access');
+        cy.logAction('➡️ Find User Account Menu');
         visitDashboard();
         cy.get('.c-show')
         .contains('User Account')
@@ -39,20 +39,23 @@ describe('BO - User Account', () => {
     });
 
     it('Should can see change password', () => {
-        cy.logAction('➡️ Change Password Access');
+        cy.logAction('➡️ Find Change Password Menu');
         visitDashboard();
         clickMenuAndAssert('Change Password', '/password');
+        cy.logAction('✅ Change Password Menu is visible');
     });
 
     it('Should can see role permission', () => {
-        cy.logAction('➡️ Role Permission Access');
+        cy.logAction('➡️ Find Role Permission Menu');
         visitDashboard();
         clickMenuAndAssert('Role Permission', '/role-permission', 'Role Permission');
+        cy.logAction('✅ Role Permission page is visible');
     });
 
     it('Should can see sub account', () => {
-        cy.logAction('➡️ Sub Account Access');
+        cy.logAction('➡️ Find Sub Account Menu');
         visitDashboard();
         clickMenuAndAssert('Sub Account', '/user', 'Sub Account');
+        cy.logAction('✅ Sub Account page is visible');
     });
 });
