@@ -21,8 +21,8 @@ describe('BO - Dashboard', () => {
         // Tunggu sampai card muncul
         cy.get('.card-body', { timeout: 20000 }).should('exist');
 
-        cy.get('.card .card-body').each(($card) => {
-            const title = $card.find('h5.card-title').text().trim();
+        cy.get('.card').each(($card) => {
+            const title = $card.find('.card-header > h5').text().trim();
             const value = $card.find('h1').text().trim();
             cy.log(`Title: ${title} | Value: ${value}`);
         });
