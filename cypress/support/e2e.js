@@ -18,6 +18,8 @@ import './commands';
 import './helpers/index';
 import 'cypress-mochawesome-reporter/register';
 import '@cypress/grep';
+import 'cypress-mochawesome-reporter/register';
+import 'cypress-terminal-report/src/installLogsCollector';
 
 // Global configuration
 Cypress.config('defaultCommandTimeout', Cypress.env('defaultTimeout') || 10000);
@@ -30,7 +32,7 @@ if (!app.document.head.querySelector('[data-hide-command-log-request]')) {
         .command-name-request, 
         .command-name-xhr, 
         .command-name-route { 
-        display: none 
+            display: none 
         }
     `;
     style.setAttribute('data-hide-command-log-request', '');
@@ -51,10 +53,12 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 });
 
 beforeEach(() => {
-    cy.viewport(1280, 720);
     cy.clearCookies();
     cy.clearLocalStorage();
     cy.intercept('GET', '**/api/**').as('apiCall');
+    cy.intercept('**/cdn-cgi/rum', { log: false });
+    cy.intercept('**/__cypress/**', { log: false });
+    cy.intercept('**/iframes/**', { log: false });
 });
 
 afterEach(function() {
