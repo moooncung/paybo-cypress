@@ -1,141 +1,201 @@
 describe('BO - IP Whitelist', () => {
+    const SELECTORS = {
+        sidebarLink: '.c-sidebar-nav-link',
+        cardHeader: '.card-header',
+        mainButtons: '.c-main .btn',
+        addButton: '.card-header-actions > #btn-add',
+        filterRow: '.row > *'
+    };
+
+    const CONFIG = {
+        dashboardUrl: '/demo_psp2/merchant/dashboard/dashboard-chart-v2',
+        expectedFilterCount: 5,
+        requiredButtons: ['Add', 'Search', 'Edit', 'Delete'],
+        requiredFilters: ['Merchant', 'ip address', 'Type']
+    };
+
     const visitIPWhitelist = () => {
-        cy.visit('/demo_psp2/merchant/dashboard/dashboard-chart-v2');
-        cy.get('.c-sidebar-nav-link')
-        .contains('IP Whitelist')
-        .click();
+        cy.logAction('➡️ Navigating to IP Whitelist page');
+        cy.visit(CONFIG.dashboardUrl);
+        cy.get(SELECTORS.sidebarLink)
+            .contains('IP Whitelist')
+            .click();
+        cy.logAction('✅ IP Whitelist page loaded');
     };
 
     beforeEach(() => {
-        // Login dan restore session
         cy.loginHelper();
         cy.logAction('✅ Session restored & user logged in');
     });
 
-    it('Should can see ip whitelist', () => {
-        cy.logAction('➡️ Find IP Whitelist Menu');
+    it('Should display IP Whitelist page correctly', () => {
         visitIPWhitelist();
-        cy.get('.card-header').should('contain.text', 'IP Whitelist');
-        cy.logAction('✅ IP Whitelist Menu is visible');
+        
+        cy.get(SELECTORS.cardHeader)
+            .should('contain.text', 'IP Whitelist');
+        
+        cy.logAction('✅ IP Whitelist header verified');
     });
 
-    it('Should can see Add, Search, Edit and Delete Button', () => {
-        cy.logAction('➡️ Find buttons on IP Whitelist page');
+    it('Should display all required action buttons', () => {
         visitIPWhitelist();
+        cy.logAction('➡️ Validating action buttons');
 
-        const requiredButtons = ['Add', 'Search', 'Edit', 'Delete'];
+        const getButtonText = (btn) => {
+            const text = btn.innerText.trim();
+            if (text) return text;
 
-        cy.get('.c-main .btn').then(($buttons) => {
-            const detectedButtons = [...$buttons].map((btn) => {
-                const text = btn.innerText.trim();
-                if (text) return text;
+            const svg = btn.querySelector('svg');
+            if (!svg) return 'Unknown Button';
 
-                const svg = btn.querySelector('svg');
-                if (svg) {
-                    const svgHTML = svg.outerHTML.toLowerCase();
+            const svgHTML = svg.outerHTML.toLowerCase();
+            if (svgHTML.includes('pencil') || svgHTML.includes('edit')) return 'Edit';
+            if (svgHTML.includes('trash') || svgHTML.includes('delete')) return 'Delete';
+            if (svgHTML.includes('search')) return 'Search';
+            
+            return 'Unknown SVG Button';
+        };
 
-                    if (svgHTML.includes('pencil') || svgHTML.includes('edit')) return 'Edit';
-                    if (svgHTML.includes('trash') || svgHTML.includes('delete')) return 'Delete';
-                    if (svgHTML.includes('search')) return 'Search';
+        cy.get(SELECTORS.mainButtons).then($buttons => {
+            const detectedButtons = [...$buttons].map(getButtonText);
+            
+            cy.logAction(`🔍 Detected buttons: ${detectedButtons.join(', ')}`);
 
-                    return 'Unknown SVG Button';
+            // Validate required buttons
+            CONFIG.requiredButtons.forEach(btnText => {
+                const found = detectedButtons.some(text => 
+                    text.toLowerCase().includes(btnText.toLowerCase())
+                );
+
+                if (!found) {
+                    throw new Error(`❌ Required button "${btnText}" not found`);
                 }
-
-                return 'Unknown Button';
-            });
-
-            cy.log(`🔍 Detected buttons: ${detectedButtons.join(', ')}`);
-
-            requiredButtons.forEach((btnText) => {
-            const found = detectedButtons.some(
-                (text) => text.toLowerCase().includes(btnText.toLowerCase())
-            );
-
-            if (found) {
                 cy.logAction(`✅ Button "${btnText}" found`);
-            } else {
-                throw new Error(`❌ Button "${btnText}" not found on IP Whitelist page`);
-            }
             });
 
-            const extraButtons = detectedButtons.filter(
-            (text) =>
-                !requiredButtons.some((req) =>
+            // Check for unexpected buttons
+            const extraButtons = detectedButtons.filter(text =>
+                !CONFIG.requiredButtons.some(req =>
                     text.toLowerCase().includes(req.toLowerCase())
                 )
             );
 
             if (extraButtons.length > 0) {
-                cy.logAction(`⚠️ Unexpected buttons detected: ${extraButtons.join(', ')}`);
+                cy.logAction(`⚠️ Unexpected buttons: ${extraButtons.join(', ')}`);
             }
         });
 
-        cy.logAction('✅ All required buttons validated on IP Whitelist page');
+        cy.logAction('✅ All action buttons validated');
     });
 
-    it('Should can see filter', () => {
-        cy.logAction('➡️ Find filter on IP Whitelist page');
+    it('Should display all filter fields', () => {
         visitIPWhitelist();
+        cy.logAction('➡️ Validating filter fields');
 
-        const expectedFilterCount = 5; // jumlah filter sekarang
-        const expectedFilters = [
-            'Merchant',
-            'ip address',
-            'Type',
-        ]; // tambahkan label jika ada filter baru
-
-        cy.get('.row > *').then(($groups) => {
-            const foundFilters = [];
-
-            if ($groups.length > expectedFilterCount) {
-                throw new Error(`❌ Found ${$groups.length} filters, but only ${expectedFilterCount} expected. There might be a new filter added!`);
+        cy.get(SELECTORS.filterRow).then($groups => {
+            if ($groups.length > CONFIG.expectedFilterCount) {
+                throw new Error(
+                    `❌ Found ${$groups.length} filters, expected ${CONFIG.expectedFilterCount}`
+                );
             }
 
-            [1, 2, 3].forEach((i) => {
+            const foundFilters = [];
+
+            // Check first 3 filter columns
+            [1, 2, 3].forEach(i => {
                 const group = $groups[i];
-                if (!group) throw new Error(`❌ Filter column ${i + 1} not found`);
+                if (!group) {
+                    throw new Error(`❌ Filter column ${i + 1} not found`);
+                }
 
                 const labelEl = group.querySelector('label');
-                const labelText = labelEl ? labelEl.innerText.trim() : `Column ${i + 1}`;
+                const labelText = labelEl?.innerText.trim() || `Column ${i + 1}`;
                 foundFilters.push(labelText);
-
-                cy.logAction(`➡️ Finding Filter "${labelText}"`);
 
                 const input = group.querySelector('input, select');
                 let value = '';
 
-                if (input) {
-                    if (input.tagName.toLowerCase() === 'select') {
-                        value = input.options[input.selectedIndex]?.text || '';
-                    } else {
-                        value = input.value || input.placeholder || '';
-                    }
+                if (input?.tagName.toLowerCase() === 'select') {
+                    value = input.options[input.selectedIndex]?.text || '';
+                } else if (input) {
+                    value = input.value || input.placeholder || '';
                 }
 
-                if (value) {
-                    cy.logAction(`✅ Filter "${labelText}" found with value: "${value}"`);
-                } else {
-                    cy.logAction(`⚠️ Filter "${labelText}" found but has no value/text`);
-                }
+                const status = value ? `with value: "${value}"` : 'but has no value';
+                cy.logAction(`${value ? '✅' : '⚠️'} Filter "${labelText}" ${status}`);
             });
 
-            const newFilters = foundFilters.filter(f => !expectedFilters.includes(f));
+            // Check for unexpected new filters
+            const newFilters = foundFilters.filter(f => 
+                !CONFIG.requiredFilters.includes(f)
+            );
+            
             if (newFilters.length > 0) {
-                throw new Error(`❌ New unexpected filter(s) found: ${newFilters.join(', ')}`);
+                throw new Error(`❌ Unexpected filter(s): ${newFilters.join(', ')}`);
             }
 
-            cy.logAction('✅ All required Filters are visible on IP Whitelist page');
+            cy.logAction('✅ All filter fields validated');
         });
     });
 
-    it('Add IP Whitelist', () => {
-        cy.logAction('➡️ Find IP Whitelist Menu');
+    it('Should successfully add IP Whitelist with single usage', () => {
         visitIPWhitelist();
-        cy.get('.card-header-actions > #btn-add').should('contain.text', 'Add').click();
+        
+        cy.logAction('➡️ Opening Add IP Whitelist modal');
+        cy.get(SELECTORS.addButton)
+            .should('contain.text', 'Add')
+            .click();
         
         cy.wait(1000);
+        cy.logAction('➡️ Filling IP Whitelist form (usage: BO)');
 
         cy.IPWhitelist('bo', 'yes');
-        cy.logAction('✅ Successfully added IP Whitelist');
+        
+        cy.logAction('✅ IP Whitelist added successfully');
+    });
+
+    it('Should successfully add IP Whitelist with multiple usages', () => {
+        visitIPWhitelist();
+        
+        cy.logAction('➡️ Opening Add IP Whitelist modal');
+        cy.get(SELECTORS.addButton).click();
+        
+        cy.wait(1000);
+        cy.logAction('➡️ Filling IP Whitelist form (usage: BO, WD, VA)');
+
+        cy.IPWhitelist(['bo', 'wd', 'va'], 'yes');
+        
+        cy.logAction('✅ IP Whitelist with multiple usages added successfully');
+    });
+
+    it('Should successfully add IP Whitelist with custom IP and merchant', () => {
+        visitIPWhitelist();
+        
+        cy.logAction('➡️ Opening Add IP Whitelist modal');
+        cy.get(SELECTORS.addButton).click();
+        
+        cy.wait(1000);
+        cy.logAction('➡️ Filling custom IP (192.168.1.1) and merchant');
+
+        cy.IPWhitelist(['bo', 'wd'], 'yes', {
+            ip: '192.168.1.1',
+            merchantName: 'Testing'
+        });
+        
+        cy.logAction('✅ Custom IP Whitelist added successfully');
+    });
+
+    it('Should handle cancellation when adding IP Whitelist', () => {
+        visitIPWhitelist();
+        
+        cy.logAction('➡️ Opening Add IP Whitelist modal');
+        cy.get(SELECTORS.addButton).click();
+        
+        cy.wait(1000);
+        cy.logAction('➡️ Filling form and canceling');
+
+        cy.IPWhitelist('bo', 'no');
+        
+        cy.logAction('✅ IP Whitelist addition cancelled successfully');
     });
 });

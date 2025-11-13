@@ -1,26 +1,20 @@
-class LoginHelper {
+export default class LoginHelper {
     fillCredentials(username = Cypress.env('username'), password = Cypress.env('password')) {
-        cy.get('body').then(($body) => {
-            if ($body.find('#username').length > 0) {
-                if (username) {
-                    cy.logAction('Filling in username with ' + username);
-                    cy.get('#username').clear().type(username);
-                } else {
-                    cy.get('#username').clear();
-                }
+        cy.get('#username').should('exist').then($username => {
+            if (username) {
+                cy.logAction(`Filling in username with ${username}`);
+                cy.wrap($username).clear().type(username);
             } else {
-                throw new Error('Username field not found');
+                cy.wrap($username).clear();
             }
+        });
 
-            if ($body.find('#password').length > 0) {
-                if (password) {
-                    cy.logAction('Filling in password with ' + password);
-                    cy.get('#password').clear().type(password);
-                } else {
-                    cy.get('#password').clear();
-                }
+        cy.get('#password').should('exist').then($password => {
+            if (password) {
+                cy.logAction(`Filling in password with ${password}`);
+                cy.wrap($password).clear().type(password);
             } else {
-                throw new Error('Password field not found');
+                cy.wrap($password).clear();
             }
         });
 
@@ -28,14 +22,15 @@ class LoginHelper {
     }
 
     submitForm() {
-        cy.get('body').then(($body) => {
-            const loginButton = $body.find('.btn:contains("Login")');
-            if (loginButton.length > 0) {
-                cy.wrap(loginButton).click();
+        cy.get('body').then($body => {
+            if ($body.find('.btn:contains("Login")').length > 0) {
+                cy.get('.btn:contains("Login")').first().click();
             } else {
                 cy.get('#password').type('{enter}');
             }
         });
+        
+        return this;
     }
 
     verifySuccessfulLogin() {
@@ -49,15 +44,11 @@ class LoginHelper {
             'body:contains("Welcome")'
         ];
 
-        cy.get('body').then(($body) => {
-            let found = false;
-            successIndicators.forEach(selector => {
-                if (!found && $body.find(selector).length > 0) {
-                    cy.get(selector, { timeout: 10000 }).should('be.visible');
-                    found = true;
-                }
-            });
-        });
+        cy.get(successIndicators.join(','), { timeout: 10000 })
+            .first()
+            .should('be.visible');
+        
+        return this;
     }
 
     verifyLoginError(expectedMessage = null) {
@@ -69,21 +60,18 @@ class LoginHelper {
             '.form-error'
         ];
 
-        cy.get('body').then(($body) => {
-            const found = errorSelectors.some(selector => $body.find(selector).length > 0);
-            expect(found, 'Error message found').to.be.true;
+        const selector = errorSelectors.join(',');
+        cy.get(selector).should('exist').and('be.visible');
 
-            if (expectedMessage) {
-                cy.get(errorSelectors.join(',')).should('contain.text', expectedMessage);
-            }
-        });
+        if (expectedMessage) {
+            cy.get(selector).first().should('contain.text', expectedMessage);
+        }
+        
+        return this;
     }
 }
 
-const loginHelper = new LoginHelper();
-
 export function loginCommands(Cypress) {
-
     Cypress.Commands.add('loginHelper', (email = null, password = null) => {
         const user = {
             email: email || Cypress.env('username'),
@@ -91,27 +79,25 @@ export function loginCommands(Cypress) {
         };
 
         cy.session(`login-${user.email}`, () => {
-            cy.visit('/login'); // URL login
-            cy.then(() => {
-                loginHelper.fillCredentials(user.email, user.password);
-                loginHelper.submitForm();
-                loginHelper.verifySuccessfulLogin();
-            });
+            cy.visit('/login');
+            
+            const helper = new LoginHelper();
+            helper
+                .fillCredentials(user.email, user.password)
+                .submitForm()
+                .verifySuccessfulLogin();
         });
-
-        // Return helper supaya bisa chaining
-        return cy.wrap(loginHelper);
     });
 
     Cypress.Commands.add('submitLogin', () => {
-        return loginHelper.submitForm();
+        return new LoginHelper().submitForm();
     });
 
     Cypress.Commands.add('verifyLoginSuccess', () => {
-        return loginHelper.verifySuccessfulLogin();
+        return new LoginHelper().verifySuccessfulLogin();
     });
 
     Cypress.Commands.add('verifyLoginError', (msg = null) => {
-        return loginHelper.verifyLoginError(msg);
+        return new LoginHelper().verifyLoginError(msg);
     });
 }
