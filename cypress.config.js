@@ -10,7 +10,7 @@ module.exports = defineConfig({
   projectId: 'hkr6k7',
 
   e2e: {
-    baseUrl: 'https://bo-dev-p1.paybo.io',
+    baseUrl: process.env.BASE_URL,
     viewportWidth: 1920,
     viewportHeight: 1080,
     defaultCommandTimeout: 15000,
@@ -63,9 +63,8 @@ module.exports = defineConfig({
     },
 
     env: {
-      baseUrl: process.env.BASE_URL,
-      username: process.env.USERNAME_BO,
-      password: process.env.PASSWORD_BO,
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
       defaultTimeout: 10000,
       retryCount: 2,
       screenshotOnFail: true,
