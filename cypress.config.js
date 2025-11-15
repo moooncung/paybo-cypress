@@ -30,7 +30,24 @@ module.exports = defineConfig({
 
       on('task', {
         log(message) {
-          console.log(`[${new Date().toISOString()}] ${message}`);
+          const now = new Date();
+          const timestamp = now.toLocaleString('en-GB', { 
+            timeZone: 'Asia/Jakarta',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          });
+
+          const logLine = `[${timestamp}] ${message}`;
+          console.log(logLine);
+
+          const logFile = path.join(__dirname, 'cypress-log.txt');
+          fs.appendFileSync(logFile, logLine + '\n');
+
           return null;
         },
 

@@ -45,6 +45,6 @@ Cypress.Commands.add('takeScreenshot', (name) => {
 });
 
 Cypress.Commands.add('logAction', (msg, data = null) => {
-    cy.task('log', `[${new Date().toISOString()}] ${msg}`);
+    cy.task('log', `${msg}`);
     if (data) cy.task('log', JSON.stringify(data, null, 2));
 });
