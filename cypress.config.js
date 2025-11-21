@@ -2,6 +2,7 @@ const { defineConfig } = require('cypress');
 const installLogsPrinter = require('cypress-terminal-report/src/installLogsPrinter');
 const path = require('path');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 const envFile = '.env';
 dotenv.config({ path: path.resolve(__dirname, './', envFile) });
@@ -58,7 +59,7 @@ module.exports = defineConfig({
 
         readFileMaybe(filename) {
           try {
-            return require('fs').readFileSync(filename, 'utf8');
+            return fs.readFileSync(filename, 'utf8');
           } catch (e) {
             return null;
           }
